@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝宝照护排班表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .baby-name-input {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-bottom: 2px solid rgba(255,255,255,0.5);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            width: 120px;
+            text-align: center;
+            padding: 2px 8px;
+            margin: 0 5px;
+        }
+
+        .baby-name-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .baby-name-input:focus {
+            outline: none;
+            border-bottom-color: white;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .header .reminder {
+            font-size: 13px;
+            opacity: 0.85;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .info-notice {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #856404;
+        }
+
+        .info-notice strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #856404;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .left-panel {
+            border-right: 2px solid #f0f0f0;
+            padding-right: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .member-card {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .member-card:hover {
+            border-color: #667eea;
+        }
+
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .member-info {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .btn-add {
+            width: 100%;
+            margin-top: 10px;
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #40c057;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .time-matrix {
+            margin-top: 15px;
+        }
+
+        .time-row {
+            display: grid;
+            grid-template-columns: 80px repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+
+        .time-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .time-slot {
+            padding: 8px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .time-slot.available {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+
+        .time-slot.preferred {
+            background: #a5d8ff;
+            color: #1864ab;
+        }
+
+        .time-slot.unavailable {
+            background: #f1f3f5;
+            color: #adb5bd;
+        }
+
+        .time-slot:hover {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+
+        .member-actions button {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #dee2e6;
+        }
+
+        .member-actions button:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .member-actions button:active {
+            background: #dee2e6;
+        }
+
+        .member-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .member-title-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .btn-reset-hint {
+            position: relative;
+        }
+
+        .btn-reset-hint:hover::after {
+            content: "根据上班/不上班类型恢复默认规则";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            margin-bottom: 5px;
+            z-index: 10;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .schedule-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .schedule-table td {
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .schedule-table td:hover {
+            background: #f8f9ff;
+        }
+
+        .schedule-table td.locked {
+            background: #fff3bf;
+        }
+
+        .schedule-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .caregiver-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .lock-icon {
+            font-size: 10px;
+            color: #fab005;
+        }
+
+        .week-control {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .contribution-container {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .contribution-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .contribution-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+
+        .contribution-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .contribution-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .contribution-message {
+            font-size: 12px;
+            color: #555;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-option {
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .modal-option:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                border-right: none;
+                border-bottom: 2px solid #f0f0f0;
+                padding-right: 0;
+                padding-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                👶 <input type="text" class="baby-name-input" id="baby-name" placeholder="宝宝" maxlength="10"> 照护排班表
+            </h1>
+            <p>让每个家人都有休息时间，科学安排照护轮换</p>
+            <p class="reminder">别忘了对彼此说声谢谢——每一份付出都值得被看见。多一点理解，一起轻松一点。</p>
+        </div>
+
+        <div class="info-notice">
+            <strong>💡 温馨提示</strong>
+            排班表的数据只保存在你当前使用的设备和浏览器中。如果家人需要一起查看，建议在同一台设备、同一个浏览器上维护排班，并将排班结果截图或分享给家人。这样的设计可以让使用更简单，也能更好地保护你和家人的隐私，所有信息都不会被上传。
+        </div>
+
+        <div class="main-content">
+            <!-- 左侧面板：成员管理 + 时间输入 -->
+            <div class="left-panel">
+                <div class="section">
+                    <div class="section-title">
+                        👨‍👩‍👧‍👦 家庭成员
+                    </div>
+                    <div id="members-list"></div>
+                    <button class="btn-add" onclick="addMember()">+ 添加成员</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        ⏰ 可用时间设置
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box" style="background: #d3f9d8;"></div>
+                            <span>可带</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="background: #a5d8ff;"></div>
+                            <span>偏好</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="background: #f1f3f5;"></div>
+                            <span>不可带</span>
+                        </div>
+                    </div>
+                    <div id="availability-matrix"></div>
+                </div>
+
+                <button class="btn-primary" style="width: 100%; padding: 12px; font-size: 16px;" onclick="generateSchedule()">
+                    🎯 自动生成排班表
+                </button>
+            </div>
+
+            <!-- 右侧面板：排班表 + 统计 -->
+            <div class="right-panel">
+                <div class="section">
+                    <div class="section-title">
+                        📅 本周排班表
+                        <span style="font-size: 12px; color: #868e96; margin-left: auto;">（点击格子可手动调整）</span>
+                    </div>
+                    <div class="week-control">
+                        <button class="btn-secondary" onclick="moveToNextWeek()">切换到下一周（清空本周排班）</button>
+                        <button class="btn-secondary btn-small" onclick="clearSchedule()">清空当前排班</button>
+                    </div>
+                    <div id="schedule-container"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        🌟 本周贡献一览
+                    </div>
+                    <div id="contribution-container" class="contribution-container"></div>
+                </div>
+
+                <div class="export-section">
+                    <button class="btn-primary" onclick="exportToCSV()">📥 导出 CSV</button>
+                    <button class="btn-secondary" onclick="exportToText()">📋 复制文本</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 调整人选弹窗 -->
+    <div id="change-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">选择照护人</div>
+            <div id="modal-options" class="modal-options"></div>
+            <button class="btn-secondary" style="width: 100%; margin-top: 15px;" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        // ============ 数据结构 ============
+        const DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        const TIME_SLOTS = ['上午', '下午', '晚上'];
+        const ROLES = ['爸爸', '妈妈', '外公', '外婆', '爷爷', '奶奶', '其他'];
+
+        // 鼓励文案库
+        const ENCOURAGEMENT_MESSAGES = [
+            '每一个陪伴的时刻都很珍贵',
+            '你的付出让家更温暖',
+            '照顾宝宝辛苦了，记得也照顾好自己',
+            '感谢你为家人的付出',
+            '你做得很棒，继续加油',
+            '每个人的努力都很重要',
+            '宝宝因为有你而幸福',
+            '辛苦了，你是最好的家人',
+            '感谢你的每一份关爱',
+            '你的陪伴是最好的礼物'
+        ];
+
+        let members = [];
+        let availability = {};
+        let schedule = {};
+        let currentEditCell = null;
+        let babyName = '';
+
+        // ============ 初始化 ============
+        function init() {
+            loadData();
+            
+            // 检查并修复旧数据或缺失的可用时间
+            validateAndFixAvailability();
+            
+            if (members.length === 0) {
+                addMember('妈妈', '妈妈', '上班');
+                addMember('爸爸', '爸爸', '上班');
+            }
+            
+            // 加载宝宝名字
+            const savedBabyName = localStorage.getItem('babycare_babyname');
+            if (savedBabyName) {
+                babyName = savedBabyName;
+                document.getElementById('baby-name').value = babyName;
+            }
+            
+            // 监听宝宝名字变化
+            document.getElementById('baby-name').addEventListener('change', function() {
+                babyName = this.value;
+                localStorage.setItem('babycare_babyname', babyName);
+            });
+            
+            renderMembers();
+            renderAvailability();
+            renderSchedule();
+            renderContribution();
+        }
+
+        // ============ 数据验证与修复 ============
+        function validateAndFixAvailability() {
+            let needsSave = false;
+            
+            members.forEach(member => {
+                // 检查该成员是否有可用时间数据
+                if (!availability[member.id]) {
+                    // 完全缺失，重新生成
+                    availability[member.id] = getDefaultAvailability(member.type);
+                    needsSave = true;
+                    return;
+                }
+                
+                // 检查是否有所有必需的时段
+                let missingSlots = false;
+                DAYS.forEach(day => {
+                    TIME_SLOTS.forEach(slot => {
+                        const key = `${day}-${slot}`;
+                        if (!availability[member.id][key]) {
+                            missingSlots = true;
+                        }
+                    });
+                });
+                
+                // 如果有缺失的时段，重新生成（这可能是版本升级导致的）
+                if (missingSlots) {
+                    availability[member.id] = getDefaultAvailability(member.type);
+                    needsSave = true;
+                    return;
+                }
+                
+                // 检查是否所有时段都是 'available'（可能是旧版本数据）
+                const allValues = DAYS.flatMap(day => 
+                    TIME_SLOTS.map(slot => availability[member.id][`${day}-${slot}`])
+                );
+                const allAvailable = allValues.every(v => v === 'available');
+                
+                // 如果所有时段都是 'available'，这可能是初始化时的旧数据
+                // 检查成员类型，如果应该有不可带的时段但全是可带，则重置
+                if (allAvailable) {
+                    const defaultAvail = getDefaultAvailability(member.type);
+                    const shouldHaveUnavailable = Object.values(defaultAvail).some(v => v === 'unavailable');
+                    
+                    if (shouldHaveUnavailable) {
+                        // 应该有不可带的时段，但实际全是可带 → 是旧数据，需要重置
+                        availability[member.id] = defaultAvail;
+                        needsSave = true;
+                    }
+                }
+            });
+            
+            if (needsSave) {
+                saveData();
+            }
+        }
+
+        // ============ 数据持久化 ============
+        function saveData() {
+            localStorage.setItem('babycare_members', JSON.stringify(members));
+            localStorage.setItem('babycare_availability', JSON.stringify(availability));
+            localStorage.setItem('babycare_schedule', JSON.stringify(schedule));
+        }
+
+        function loadData() {
+            const savedMembers = localStorage.getItem('babycare_members');
+            const savedAvailability = localStorage.getItem('babycare_availability');
+            const savedSchedule = localStorage.getItem('babycare_schedule');
+            
+            if (savedMembers) members = JSON.parse(savedMembers);
+            if (savedAvailability) availability = JSON.parse(savedAvailability);
+            if (savedSchedule) schedule = JSON.parse(savedSchedule);
+        }
+
+        // ============ 默认可用时间规则 ============
+        function getDefaultAvailability(type) {
+            const defaults = {};
+            
+            DAYS.forEach((day, dayIndex) => {
+                const isWeekday = dayIndex < 5; // 周一到周五
+                
+                TIME_SLOTS.forEach(slot => {
+                    const key = `${day}-${slot}`;
+                    
+                    if (type === '上班') {
+                        // 上班：工作日只有晚上可带，周末全可带
+                        if (isWeekday) {
+                            defaults[key] = slot === '晚上' ? 'available' : 'unavailable';
+                        } else {
+                            defaults[key] = 'available';
+                        }
+                    } else {
+                        // 不上班：工作日全可带，周末不可带
+                        defaults[key] = isWeekday ? 'available' : 'unavailable';
+                    }
+                });
+            });
+            
+            return defaults;
+        }
+
+        // ============ 成员管理 ============
+        function addMember(name = '', role = '爸爸', type = '上班') {
+            const id = 'member_' + Date.now();
+            members.push({
+                id,
+                name: name || '新成员',
+                role,
+                type,
+                maxHours: 8
+            });
+            
+            // 使用默认规则初始化可用性
+            availability[id] = getDefaultAvailability(type);
+            
+            saveData();
+            renderMembers();
+            renderAvailability();
+        }
+
+        function removeMember(id) {
+            if (!confirm('确定要删除这位家人吗？')) return;
+            members = members.filter(m => m.id !== id);
+            delete availability[id];
+            
+            Object.keys(schedule).forEach(key => {
+                if (schedule[key].caregiverId === id) {
+                    delete schedule[key];
+                }
+            });
+            
+            saveData();
+            renderMembers();
+            renderAvailability();
+            renderSchedule();
+            renderContribution();
+        }
+
+        function updateMember(id, field, value) {
+            const member = members.find(m => m.id === id);
+            if (member) {
+                const oldType = member.type;
+                member[field] = value;
+                
+                // 如果改变了类型，重置可用时间
+                if (field === 'type' && oldType !== value) {
+                    availability[id] = getDefaultAvailability(value);
+                }
+                
+                saveData();
+                renderMembers();
+                if (field === 'type') {
+                    renderAvailability();
+                }
+            }
+        }
+
+        function resetMemberAvailability(id) {
+            const member = members.find(m => m.id === id);
+            if (member && confirm('确定要按默认规则重置此成员的可用时间吗？')) {
+                availability[id] = getDefaultAvailability(member.type);
+                saveData();
+                renderAvailability();
+            }
+        }
+
+        function setAllAvailable(id, status) {
+            DAYS.forEach(day => {
+                TIME_SLOTS.forEach(slot => {
+                    availability[id][`${day}-${slot}`] = status;
+                });
+            });
+            saveData();
+            renderAvailability();
+        }
+
+        function renderMembers() {
+            const container = document.getElementById('members-list');
+            container.innerHTML = members.map(member => `
+                <div class="member-card">
+                    <div class="member-header">
+                        <input type="text" value="${member.name}" 
+                               onchange="updateMember('${member.id}', 'name', this.value)"
+                               style="font-weight: 600; width: 100px;">
+                        <button class="btn-danger" onclick="removeMember('${member.id}')">删除</button>
+                    </div>
+                    <div class="member-info">
+                        <select onchange="updateMember('${member.id}', 'role', this.value)">
+                            ${ROLES.map(r => `<option ${member.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                        </select>
+                        <select onchange="updateMember('${member.id}', 'type', this.value)">
+                            <option ${member.type === '上班' ? 'selected' : ''}>上班</option>
+                            <option ${member.type === '不上班' ? 'selected' : ''}>不上班</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============ 可用时间矩阵 ============
+        function renderAvailability() {
+            const container = document.getElementById('availability-matrix');
+            
+            container.innerHTML = members.map(member => `
+                <div style="margin-bottom: 20px;">
+                    <div class="member-title-row">
+                        <span class="member-title-name">${member.name}</span>
+                        <div class="member-actions">
+                            <button class="btn-reset-hint" onclick="resetMemberAvailability('${member.id}')">
+                                重置为默认
+                            </button>
+                            <button onclick="setAllAvailable('${member.id}', 'available')">
+                                全可带
+                            </button>
+                            <button onclick="setAllAvailable('${member.id}', 'unavailable')">
+                                全不可带
+                            </button>
+                        </div>
+                    </div>
+                    <div class="time-row" style="font-weight: 500; font-size: 11px; color: #868e96;">
+                        <div></div>
+                        ${TIME_SLOTS.map(slot => `<div>${slot}</div>`).join('')}
+                    </div>
+                    ${DAYS.map(day => `
+                        <div class="time-row">
+                            <div class="time-label">${day}</div>
+                            ${TIME_SLOTS.map(slot => {
+                                const key = `${day}-${slot}`;
+                                const status = availability[member.id][key] || 'available';
+                                return `
+                                    <div class="time-slot ${status}" 
+                                         onclick="toggleAvailability('${member.id}', '${key}')">
+                                        ${status === 'preferred' ? '★' : status === 'available' ? '✓' : '✗'}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function toggleAvailability(memberId, key) {
+            const current = availability[memberId][key];
+            const cycle = {
+                'available': 'preferred',
+                'preferred': 'unavailable',
+                'unavailable': 'available'
+            };
+            availability[memberId][key] = cycle[current];
+            saveData();
+            renderAvailability();
+        }
+
+        // ============ 排班算法 ============
+        function generateSchedule() {
+            const lockedSlots = {};
+            Object.keys(schedule).forEach(key => {
+                if (schedule[key].locked) {
+                    lockedSlots[key] = schedule[key];
+                }
+            });
+
+            schedule = { ...lockedSlots };
+
+            const slots = [];
+            DAYS.forEach(day => {
+                TIME_SLOTS.forEach(slot => {
+                    const key = `${day}-${slot}`;
+                    if (!schedule[key]) {
+                        slots.push({ day, slot, key });
+                    }
+                });
+            });
+
+            const assignmentCount = {};
+            members.forEach(m => assignmentCount[m.id] = 0);
+            Object.values(schedule).forEach(s => {
+                assignmentCount[s.caregiverId]++;
+            });
+
+            slots.forEach(({ day, slot, key }) => {
+                const candidates = members.filter(member => {
+                    const status = availability[member.id][key];
+                    return status === 'available' || status === 'preferred';
+                });
+
+                if (candidates.length === 0) return;
+
+                candidates.sort((a, b) => {
+                    const aPreferred = availability[a.id][key] === 'preferred' ? 100 : 0;
+                    const bPreferred = availability[b.id][key] === 'preferred' ? 100 : 0;
+                    const aCount = assignmentCount[a.id];
+                    const bCount = assignmentCount[b.id];
+                    
+                    return (aPreferred - bPreferred) || (aCount - bCount);
+                });
+
+                const selected = candidates[0];
+                schedule[key] = {
+                    caregiverId: selected.id,
+                    locked: false
+                };
+                assignmentCount[selected.id]++;
+            });
+
+            saveData();
+            renderSchedule();
+            renderContribution();
+        }
+
+        // ============ 排班表渲染 ============
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            
+            let html = '<table class="schedule-table">';
+            html += '<thead><tr><th>时段</th>';
+            DAYS.forEach(day => html += `<th>${day}</th>`);
+            html += '</tr></thead><tbody>';
+
+            TIME_SLOTS.forEach(slot => {
+                html += `<tr><td style="background: #f8f9fa; font-weight: 600;">${slot}</td>`;
+                DAYS.forEach(day => {
+                    const key = `${day}-${slot}`;
+                    const assignment = schedule[key];
+                    const locked = assignment?.locked ? 'locked' : '';
+                    
+                    let content = '—';
+                    if (assignment) {
+                        const member = members.find(m => m.id === assignment.caregiverId);
+                        if (member) {
+                            content = `
+                                <div class="schedule-cell">
+                                    <span class="caregiver-name">${member.name}</span>
+                                    ${assignment.locked ? '<span class="lock-icon">🔒</span>' : ''}
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    html += `<td class="${locked}" onclick="openChangeModal('${key}')">${content}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ============ 手动调整 ============
+        function openChangeModal(key) {
+            currentEditCell = key;
+            
+            const availableMembers = members.filter(member => {
+                const status = availability[member.id][key];
+                return status === 'available' || status === 'preferred';
+            });
+
+            const modalOptions = document.getElementById('modal-options');
+            modalOptions.innerHTML = availableMembers.map(member => `
+                <div class="modal-option" onclick="assignCaregiver('${key}', '${member.id}')">
+                    ${member.name} ${availability[member.id][key] === 'preferred' ? '⭐' : ''}
+                </div>
+            `).join('');
+
+            if (schedule[key]) {
+                modalOptions.innerHTML += `
+                    <div class="modal-option" onclick="toggleLock('${key}')" style="background: #fff3bf;">
+                        ${schedule[key].locked ? '🔓 解除锁定' : '🔒 锁定此时段'}
+                    </div>
+                    <div class="modal-option" onclick="clearSlot('${key}')" style="background: #ffe0e0;">
+                        ❌ 清空此时段
+                    </div>
+                `;
+            }
+
+            document.getElementById('change-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('change-modal').classList.remove('active');
+        }
+
+        function assignCaregiver(key, memberId) {
+            schedule[key] = {
+                caregiverId: memberId,
+                locked: schedule[key]?.locked || false
+            };
+            saveData();
+            renderSchedule();
+            renderContribution();
+            closeModal();
+        }
+
+        function toggleLock(key) {
+            if (schedule[key]) {
+                schedule[key].locked = !schedule[key].locked;
+                saveData();
+                renderSchedule();
+            }
+            closeModal();
+        }
+
+        function clearSlot(key) {
+            delete schedule[key];
+            saveData();
+            renderSchedule();
+            renderContribution();
+            closeModal();
+        }
+
+        // ============ 周切换 ============
+        function moveToNextWeek() {
+            if (confirm('确定要切换到下一周吗？当前排班将被清空。')) {
+                schedule = {};
+                saveData();
+                renderSchedule();
+                renderContribution();
+            }
+        }
+
+        function clearSchedule() {
+            if (confirm('确定要清空当前排班吗？')) {
+                schedule = {};
+                saveData();
+                renderSchedule();
+                renderContribution();
+            }
+        }
+
+        // ============ 贡献统计 ============
+        function renderContribution() {
+            const container = document.getElementById('contribution-container');
+            
+            const stats = {};
+            members.forEach(m => stats[m.id] = 0);
+            Object.values(schedule).forEach(s => {
+                if (stats[s.caregiverId] !== undefined) {
+                    stats[s.caregiverId]++;
+                }
+            });
+
+            const html = members.map(member => {
+                const count = stats[member.id];
+                const message = ENCOURAGEMENT_MESSAGES[Math.floor(Math.random() * ENCOURAGEMENT_MESSAGES.length)];
+                
+                return `
+                    <div class="contribution-card">
+                        <div class="contribution-name">${member.name}</div>
+                        <div class="contribution-value">${count}</div>
+                        <div class="contribution-label">个时段</div>
+                        <div class="contribution-message">${message}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        // ============ 导出功能 ============
+        function exportToCSV() {
+            let csv = 'Day,TimeSlot,Caregiver\n';
+            DAYS.forEach(day => {
+                TIME_SLOTS.forEach(slot => {
+                    const key = `${day}-${slot}`;
+                    const assignment = schedule[key];
+                    if (assignment) {
+                        const member = members.find(m => m.id === assignment.caregiverId);
+                        csv += `${day},${slot},${member ? member.name : '未安排'}\n`;
+                    }
+                });
+            });
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const filename = babyName ? `${babyName}照护排班表.csv` : '宝宝照护排班表.csv';
+            link.download = filename;
+            link.click();
+        }
+
+        function exportToText() {
+            const title = babyName ? `${babyName}` : '宝宝';
+            let text = `📅 ${title}照护排班表\n\n`;
+            
+            DAYS.forEach(day => {
+                text += `${day}：\n`;
+                TIME_SLOTS.forEach(slot => {
+                    const key = `${day}-${slot}`;
+                    const assignment = schedule[key];
+                    const member = assignment ? members.find(m => m.id === assignment.caregiverId) : null;
+                    text += `  ${slot}：${member ? member.name : '未安排'}${assignment?.locked ? '🔒' : ''}\n`;
+                });
+                text += '\n';
+            });
+
+            text += '📊 本周贡献一览：\n';
+            members.forEach(member => {
+                const count = Object.values(schedule).filter(s => s.caregiverId === member.id).length;
+                text += `  ${member.name}：${count} 个时段\n`;
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ 排班表已复制到剪贴板，可以直接发送到家庭群了！');
+            });
+        }
+
+        // ============ 启动应用 ============
+        init();
+    </script>
+</body>
+</html>
