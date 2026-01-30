@@ -955,7 +955,7 @@
                         const aCount = assignmentCount[a.id];
                         const bCount = assignmentCount[b.id];
                         
-                        return (aPreferred - bPreferred) || (aCount - bCount);
+                        return (bPreferred - aPreferred) || (aCount - bCount);
                     });
                     const selected = candidates[0];
                     schedule[key] = {
